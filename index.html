@@ -1,7 +1,103 @@
-S
-
-# Smart Helper
-
-Davlat xizmatlari bo’yicha AI maslahatchi
-
-Namunaviy demo. Aniq ma’lumot va to’lovlar uchun my.gov.uz saytini tekshiring.
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart Helper — Davlat xizmatlari, bir savol bilan</title>
+<style>
+:root{--sky:#0a1a55;--p:rgba(242,193,78,.07);--glow:rgba(25,198,180,.28);--gold:#f2c14e;--turq:#19c6b4;--paper:#fbf4e2;--paper2:#f1e4c0;--ink:#10214f;--tile:#12307a;--tilefg:#fbf4e2;--bubble:#e3f6f1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--sky:#a9ebe0;--p:rgba(16,33,79,.08);--glow:rgba(255,255,255,.7);--tile:#fbf4e2;--tilefg:#10214f}}
+:root[data-theme="light"]{--sky:#a9ebe0;--p:rgba(16,33,79,.08);--glow:rgba(255,255,255,.7);--tile:#fbf4e2;--tilefg:#10214f}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background-color:var(--sky);background-image:conic-gradient(from 22.5deg at 50% 50%,var(--p) 0 12.5%,transparent 0 25%,var(--p) 0 37.5%,transparent 0 50%,var(--p) 0 62.5%,transparent 0 75%,var(--p) 0 87.5%,transparent 0);background-size:72px 72px;color:var(--ink);font:16px/1.5 "Trebuchet MS","Segoe UI",system-ui,sans-serif;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 38%,var(--glow),transparent 62%);pointer-events:none}
+.stage{position:relative;min-height:100%;display:grid;grid-template-columns:1fr minmax(0,450px) 1fr;gap:34px;align-items:center;padding:24px}
+.col{display:flex;flex-direction:column;gap:14px}
+.col.l{align-items:flex-end}.col.r{align-items:flex-start}
+.col.l .tile:nth-child(even){margin-right:42px}.col.r .tile:nth-child(even){margin-left:42px}
+.tile{position:relative;width:var(--s,100px);height:var(--s,100px);flex:none;border:0;padding:0;background:var(--gold);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);cursor:pointer;color:var(--tilefg);font:inherit;transition:transform .2s}
+.tile::before{content:"";position:absolute;inset:2px;background:var(--tile);clip-path:inherit;transition:background .2s}
+.tile span{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:2px;font-size:11px;font-weight:700;letter-spacing:.02em}
+.tile b{font-size:calc(var(--s,100px)*.3);line-height:1}
+.tile:hover,.tile:focus-visible{transform:scale(1.1);outline:0}
+.tile:hover::before,.tile:focus-visible::before{background:var(--turq)}
+.tile:hover span,.tile:focus-visible span{color:#06231f}
+.arch{height:min(820px,calc(100dvh - 48px));min-height:560px;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(var(--paper),var(--paper2));border:3px solid var(--gold);border-radius:50% 50% 26px 26px/170px 170px 26px 26px;box-shadow:0 0 0 7px var(--sky),0 0 0 9px var(--gold),0 30px 80px rgba(0,0,0,.4)}
+.head{text-align:center;padding:30px 24px 12px}
+.star{width:60px;height:60px;margin:0 auto 6px;position:relative;display:grid;place-items:center;font:700 22px Georgia,serif;color:var(--ink)}
+.star::before,.star::after{content:"";position:absolute;inset:7px;background:var(--gold);animation:sp 26s linear infinite}
+.star::after{background:var(--turq);animation-name:sp2;mix-blend-mode:multiply;opacity:.85}
+.star i{position:relative;z-index:1;font-style:normal}
+@keyframes sp{to{transform:rotate(360deg)}}@keyframes sp2{from{transform:rotate(45deg)}to{transform:rotate(405deg)}}
+h1{margin:0;font:700 30px/1.1 Georgia,"Palatino Linotype",serif;letter-spacing:.01em}
+.head p{margin:4px 0 0;font:italic 15px Georgia,serif;color:#4f5f86}
+#log{flex:1;overflow-y:auto;padding:10px 22px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:86%;padding:10px 14px;border-radius:14px;white-space:pre-wrap;overflow-wrap:anywhere;animation:in .3s ease both}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.bot{background:var(--bubble);border-left:4px solid var(--turq);border-top-left-radius:2px;align-self:flex-start;color:var(--ink)}
+.me{background:var(--ink);color:var(--paper);border-top-right-radius:2px;align-self:flex-end}
+.typing i{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--turq);animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{50%{transform:translateY(-5px)}}
+form{display:flex;gap:8px;padding:10px 20px 8px}
+input{flex:1;min-width:0;padding:12px 16px;border:2px solid var(--ink);border-radius:999px;background:#fff;color:var(--ink);font:inherit}
+.send{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:var(--ink);font:700 15px Georgia,serif;cursor:pointer}
+.send:hover{background:var(--turq)}
+:focus-visible{outline:3px solid var(--turq);outline-offset:2px}
+small{display:block;text-align:center;padding:0 20px 16px;font-size:11.5px;color:#6a7798}
+.strip{display:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+@media (max-width:940px){
+.stage{grid-template-columns:1fr;grid-template-rows:1fr auto;gap:14px;padding:14px 12px 10px;height:100%}
+.col{display:none}
+.arch{height:100%;min-height:0;border-radius:50% 50% 22px 22px/90px 90px 22px 22px;box-shadow:0 0 0 5px var(--sky),0 0 0 7px var(--gold),0 20px 50px rgba(0,0,0,.4)}
+.head{padding-top:20px}h1{font-size:25px}.star{width:48px;height:48px}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 6px;--s:78px}
+.strip .tile span{font-size:10px}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="col l" id="cl"></div>
+<section class="arch">
+<div class="head"><div class="star"><i>S</i></div><h1>Smart Helper</h1><p>Davlat xizmatlari — bir savol bilan</p></div>
+<div id="log" aria-live="polite"></div>
+<form id="f"><input id="q" placeholder="Masalan: pasport olish uchun nima kerak?" autocomplete="off" aria-label="Savol"><button class="send" type="submit">Yubor</button></form>
+<small>Namunaviy demo. Aniq ma’lumot va to’lovlar uchun my.gov.uz saytini tekshiring.</small>
+</section>
+<div class="col r" id="cr"></div>
+<div class="strip" id="st"></div>
+</div>
+<script>
+const KB=[
+{e:"🛂",n:"Pasport",k:["pasport","passport","id karta","id-karta"],t:"Pasport / ID-karta olish yoki almashtirish:\n1. my.gov.uz orqali ariza yuboring yoki IIB/Davlat xizmatlari markaziga boring.\n2. Kerak: eski pasport (bo’lsa), tug’ilganlik haqida guvohnoma, to’lov kvitansiyasi, rasm.\n3. Tayyor bo’lgach, xabarnoma keladi va hujjatni markazdan olasiz."},
+{e:"🚗",n:"Prava",k:["prava","haydovchi","guvohnoma"],t:"Haydovchilik guvohnomasi:\n1. Avtomaktabda o’qib, imtihonga yoziling.\n2. Nazariy va amaliy imtihondan o’ting.\n3. Tibbiy ma’lumotnoma va to’lov kvitansiyasini tayyorlang.\n4. Guvohnomani ariza bo’yicha oling (my.gov.uz orqali ham mumkin)."},
+{e:"🏠",n:"Ro’yxat",k:["propiska","ro'yxat","royxat","registratsiya","yashash"],t:"Doimiy yoki vaqtincha ro’yxatga turish:\n1. Uy egasining roziligi kerak.\n2. my.gov.uz orqali onlayn ariza bering.\n3. Pasport/ID-karta va uy-joy hujjatlari talab qilinadi.\n4. Natija elektron tarzda xabar qilinadi."},
+{e:"💰",n:"Soliq",k:["soliq","stir","inn"],t:"Soliq xizmatlari:\n- STIR (soliq to’lovchi raqami) olish, deklaratsiya topshirish va qarzni tekshirishni soliq.uz kabineti orqali onlayn qilish mumkin.\n- Kirish uchun OneID yoki ERI kalit ishlatiladi."},
+{e:"👵",n:"Nafaqa",k:["nafaqa","pensiya","yordam"],t:"Nafaqa va pensiya:\n1. Ariza my.gov.uz yoki mahalla/Davlat xizmatlari markazi orqali beriladi.\n2. Kerak: pasport, ish stajini tasdiqlovchi hujjat, bank rekvizitlari.\n3. Ko’rib chiqish muddati nafaqa turiga qarab farq qiladi."},
+{e:"💼",n:"Bandlik",k:["ish","bandlik","ishsizlik","mehnat"],t:"Ishga joylashish va bandlik:\n1. Ishsiz sifatida mehnat birjasida ro’yxatdan o’ting (ish.uz yoki my.gov.uz).\n2. Bo’sh ish o’rinlari tavsiya etiladi.\n3. Shartlarga javob bersangiz, vaqtincha nafaqa belgilanishi mumkin."},
+{e:"🏢",n:"Biznes",k:["biznes","tadbirkor","yakka tartibdagi","kompaniya"],t:"Tadbirkorlikni ro’yxatdan o’tkazish:\n1. my.gov.uz orqali yakka tartibdagi tadbirkor yoki yuridik shaxs sifatida onlayn ariza bering.\n2. Soliq organi va statistika idorasida avtomatik ro’yxatga olinasiz.\n3. Bank hisobvarag’ini oching."},
+{e:"👶",n:"Tug’ilish",k:["tug'ilgan","tugilgan","tug'ilish","tugilish","bola","metrika"],t:"Tug’ilganlik haqida guvohnoma:\n1. Tibbiyot muassasasidan tug’ilish haqida ma’lumotnoma oling.\n2. FHDYo bo’limiga yoki my.gov.uz orqali ariza bering.\n3. Ota-onalarning pasportlari va nikoh guvohnomasi kerak bo’ladi."},
+{e:"💍",n:"Nikoh",k:["nikoh","to'y","toy","turmush"],t:"Nikohdan o’tish:\n1. Ariza FHDYo bo’limiga yoki my.gov.uz orqali beriladi.\n2. Ikkala tomon pasporti va to’lov kvitansiyasi kerak.\n3. Ariza berilgandan keyin belgilangan muddat o’tgach, nikoh qayd etiladi."},
+{e:"💡",n:"Kommunal",k:["kommunal","svet","gaz","suv","elektr"],t:"Kommunal xizmatlar bo’yicha:\n1. To’lovlarni my.gov.uz, bank ilovalari yoki to’lov terminallari orqali amalga oshirish mumkin.\n2. Nizoli holatlarda tegishli kommunal tashkilotga murojaat qiling.\n3. Subsidiya huquqi bo’lsa, mahalla orqali ariza berish mumkin."},
+{e:"🎓",n:"Ta’lim",k:["maktab","bogcha","bog'cha","universitet","talaba","diplom","ta'lim","talim"],t:"Ta’lim xizmatlari:\n1. Maktab/bog’chaga qabul uchun hudud bo’yicha ta’lim muassasasiga yoki my.gov.uz ga murojaat qiling.\n2. Diplom tasdiqlash va dublikat olish uchun OTM yoki Oliy ta’lim vazirligiga ariza beriladi."}
+];
+const log=document.getElementById("log"),q=document.getElementById("q");
+function add(t,c){const d=document.createElement("div");d.className="m "+c;d.textContent=t;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
+function answer(s){const x=s.toLowerCase().replace(/[’`ʻʼ]/g,"'");
+const h=KB.find(e=>e.k.some(w=>x.includes(w)));
+if(h)return h.t+"\n\nBatafsil: my.gov.uz";
+if(/salom|assalom|hayrli/.test(x))return "Assalomu alaykum! Qaysi davlat xizmati bo’yicha yordam kerak?";
+return "Bu savol bo’yicha aniq ma’lumotim yo’q. Yon tomondagi xizmatlardan birini tanlang yoki boshqacha so’rab ko’ring."}
+function ask(s){add(s,"me");const d=add("","bot typing");d.innerHTML="<i></i><i></i><i></i>";setTimeout(()=>{d.className="m bot";d.textContent=answer(s)},700)}
+function tile(e){const b=document.createElement("button");b.type="button";b.className="tile";b.setAttribute("aria-label",e.n);b.innerHTML="<span><b>"+e.e+"</b>"+e.n+"</span>";b.onclick=()=>ask(e.n);return b}
+KB.forEach((e,i)=>{document.getElementById(i<6?"cl":"cr").appendChild(tile(e));document.getElementById("st").appendChild(tile(e))});
+document.getElementById("f").onsubmit=ev=>{ev.preventDefault();const v=q.value.trim();if(!v)return;q.value="";ask(v)};
+add("Assalomu alaykum! Men Smart Helper man. Savolingizni yozing yoki xizmat belgisini tanlang.","bot");
+</script>
+</body>
+</html>
